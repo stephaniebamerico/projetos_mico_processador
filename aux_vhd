@@ -1,0 +1,1130 @@
+-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+-- UFPR, BCC, ci210 2016-2 trabalho semestral, autor: Roberto Hexsel, 07out
+-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+-- MULTIPLEXADORES
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+-- mux2(a,b,s,z)
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+use work.p_wires.all;
+entity mux2 is
+  port(A,B : in  bit;
+       S   : in  bit;
+       Z   : out bit);
+end mux2;
+architecture estrut of mux2 is 
+  component inv is
+    generic (prop : time);
+    port(A : in bit; S : out bit);
+  end component inv;
+  component and2 is
+    generic (prop : time);
+    port(A,B : in bit; S : out bit);
+  end component and2;
+  component or2 is
+    generic (prop : time);
+    port(A,B : in bit; S : out bit);
+  end component or2;
+  signal negs,f0,f1 : bit;
+ begin
+  Ui:  inv  generic map (t_inv)  port map(s,negs);
+  Ua0: and2 generic map (t_and2) port map(a,negs,f0);
+  Ua1: and2 generic map (t_and2) port map(b,s,f1);
+  Uor: or2  generic map (t_or2)  port map(f0,f1,z);
+    
+end architecture estrut;
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+-- MUX de 2 entradas 16 bits
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+use work.p_wires.all;
+entity mux2Vet16 is
+  port(A,B : in  reg16;
+       S   : in  bit;
+       Z   : out reg16);
+end mux2Vet16;
+architecture estruturaMux of mux2Vet16 is
+	component mux2 is
+	port(A,B : in  bit;
+       S   : in  bit;
+       Z   : out bit);
+    end component mux2;
+	
+begin
+	umux0: mux2 port map (A(0),B(0),S,Z(0));
+	umux1: mux2 port map (A(1),B(1),S,Z(1));
+	umux2: mux2 port map (A(2),B(2),S,Z(2));
+	umux3: mux2 port map (A(3),B(3),S,Z(3));
+	umux4: mux2 port map (A(4),B(4),S,Z(4));
+	umux5: mux2 port map (A(5),B(5),S,Z(5));
+	umux6: mux2 port map (A(6),B(6),S,Z(6));
+	umux7: mux2 port map (A(7),B(7),S,Z(7));
+	umux8: mux2 port map (A(8),B(8),S,Z(8));
+	umux9: mux2 port map (A(9),B(9),S,Z(9));
+	umux10: mux2 port map (A(10),B(10),S,Z(10));
+	umux11: mux2 port map (A(11),B(11),S,Z(11));
+	umux12: mux2 port map (A(12),B(12),S,Z(12));
+	umux13: mux2 port map (A(13),B(13),S,Z(13));
+	umux14: mux2 port map (A(14),B(14),S,Z(14));
+	umux15: mux2 port map (A(15),B(15),S,Z(15));
+	
+end architecture estruturaMux;
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+-- MUX de 2 entradas 32 bits
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+use work.p_wires.all;
+entity mux2Vet32 is
+  port(A,B : in  reg32;
+       S   : in  bit;
+       Z   : out reg32);
+end mux2Vet32;
+architecture estruturaMux of mux2Vet32 is
+	component  mux2Vet16 is
+	port(A,B : in  reg16;
+       S   : in  bit;
+       Z   : out reg16);
+    end component  mux2Vet16;
+	
+begin
+	umux0: mux2Vet16 port map (A(15 downto 0), B(15 downto 0),S, Z(15 downto 0));
+	umux1: mux2Vet16 port map (A(31 downto 16), B(31 downto 16),S, Z(31 downto 16));
+	
+end architecture estruturaMux;
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+-- MUX de 4 entradas 32 bits
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+use work.p_wires.all;
+entity mux4Vet32 is
+  port(A,B,C,D : in  reg32;
+       S   : in  reg4;
+       Z   : out reg32);
+end mux4Vet32;
+
+architecture strut of mux4Vet32 is
+
+  component mux2Vet32 is
+  port(A,B : in  reg32;
+       S   : in  bit;
+       Z   : out reg32);
+  end component mux2Vet32;
+
+  signal aux1,aux2 : reg32;
+
+begin
+	Ua0 : mux2Vet32 port map (A,B,S(0),aux1);
+	Ua1 : mux2Vet32 port map (C,D,S(0),aux2);
+	Ub0 : mux2Vet32 port map (aux1,aux2,S(1),Z);
+end;
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+-- MUX de 8 entradas 32 bits
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+use work.p_wires.all;
+entity mux8Vet32 is
+  port(A,B,C,D,E,F,G,H : in  reg32;
+       S   : in  reg4;
+       Z   : out reg32);
+end mux8Vet32;
+
+architecture strut of mux8Vet32 is
+
+  component mux4Vet32 is
+  port(A,B,C,D : in  reg32;
+       S   : in  reg4;
+       Z   : out reg32);
+  end component mux4Vet32;
+ 
+  component mux2Vet32 is
+  port(A,B : in  reg32;
+       S   : in  bit;
+       Z   : out reg32);
+  end component mux2Vet32;
+
+  signal aux1,aux2 : reg32;
+
+begin
+  Ua0 : mux4Vet32 port map (a,b,c,d,S,aux1);
+  Ua1 : mux4Vet32 port map (e,f,g,h,S,aux2);
+  Ua2 : mux2Vet32 port map (aux1, aux2, s(2), z);
+end;
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+-- MUX de 16 entradas 32 bits
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+use work.p_wires.all;
+entity mux16Vet32 is
+  port(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P: in  reg32;
+       S   : in  reg4;
+       Z   : out reg32);
+end mux16Vet32;
+
+architecture strut of mux16Vet32 is
+
+  component mux8Vet32 is
+  port(A,B,C,D,E,F,G,H : in  reg32;
+       S   : in  reg4;
+       Z   : out reg32);
+  end component mux8Vet32;
+ 
+  component mux2Vet32 is
+  port(A,B : in  reg32;
+       S   : in  bit;
+       Z   : out reg32);
+  end component mux2Vet32;
+
+  signal aux1,aux2 : reg32;
+
+begin
+  Ua0 : mux8Vet32 port map (a,b,c,d,e,f,g,h,S,aux1);
+  Ua1 : mux8Vet32 port map (i,j,k,l,m,n,o,p,S,aux2);
+  Ua2 : mux2Vet32 port map (aux1, aux2, s(3), z);
+end;
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+-- DEMULTIPLEXADORES
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ -- demux2
+ -- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ use work.p_wires.all;
+ 
+ entity demux2 is
+   port(a   : in  bit;
+        s   : in  bit;
+        z : out reg2);
+ end demux2;
+ 
+ architecture estrut of demux2 is 
+ 
+ -- declara componentes que sao instanciados
+   component inv is
+     port(A : in bit; S : out bit);
+   end component inv;
+   
+   component and2 is
+      port(A, B : in  bit;
+           S    : out bit);
+    end component and2;
+ 
+   signal p : bit;              -- sinais internos
+ 
+ begin
+  d0: and2 port map (a, s, z(0));
+  d1: inv port map (s, p);
+  d2: and2  port map (a, p, z(1));
+ end architecture estrut;
+ -- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ -- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ -- demux4
+ -- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ use work.p_wires.all;
+ 
+ entity demux4 is
+   port(a : in bit;
+        s : in reg2;
+        z : out reg4);
+ end demux4;
+ 
+ architecture estrut of demux4 is
+ 	component demux2 is
+   	 port(a : in bit;
+          s : in bit;
+          z : out reg2);
+ 	end component demux2;
+   
+   signal p : reg2;
+ begin
+   -- implemente com demux2
+   Ud0: demux2 port map(a, s(1), p);
+   Ud1: demux2 port map(p(1), s(0), z(3 downto 2));
+   Ud2: demux2 port map(p(0), s(0), z(1 downto 0));
+   
+ 
+ end architecture estrut;
+ -- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ -- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ -- demux8
+ -- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ use work.p_wires.all;
+ 
+ entity demux8 is
+   port(a : in bit;
+        s : in reg3;
+        z : out reg8);
+ end demux8;
+ 
+ architecture estrut of demux8 is
+ 	component demux2 is
+   	 port(a : in bit;
+          s : in bit;
+          z : out reg2);
+ 	end component demux2;
+   
+ 	component demux4 is
+     port(a : in bit;
+        s : in reg2;
+        z : out reg4);
+ 	end component demux4;
+   
+   signal i : reg2;
+ begin
+   -- implemente com demux4
+   Ud0: demux2 port map(a, s(2), i);
+   Ud1: demux4 port map(i(1), s(1 downto 0), z(7 downto 4));
+   Ud2: demux4 port map(i(0), s(1 downto 0), z(3 downto 0));
+ 
+ end architecture estrut;
+ -- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ -- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ -- demux16
+ -- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ use work.p_wires.all;
+ 
+ entity demux16 is
+   port(a : in bit;
+        s : in reg4;
+        z : out reg16);
+ end demux16;
+ 
+ architecture estrut of demux16 is
+   component demux2 is
+   	 port(a : in bit;
+          s : in bit;
+          z : out reg2);
+ 	end component demux2;
+   
+ 	component demux8 is
+     port(a : in bit;
+        s : in reg3;
+        z : out reg8);
+ 	end component demux8;
+   
+   signal i : reg2;
+ begin
+   Ud0: demux2 port map(a, s(3), i);
+   Ud1: demux8 port map(i(1), s(2 downto 0), z(15 downto 8));
+   Ud2: demux8 port map(i(0), s(2 downto 0), z(7 downto 0));
+ 
+ end architecture estrut;
+ -- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+-- PORTAS LOGICAS
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+-- inversor 1 bit
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+use work.p_wires.all;
+entity inv is
+  generic (prop : time := t_inv);
+  port(A : in bit;
+       S : out bit);
+end inv;
+architecture comport of inv is 
+begin
+    S <= (not A) after prop;
+end architecture comport;
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+-- inversor 32 bits
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+use work.p_wires.all;
+entity inv32 is
+  generic (prop : time := t_inv);
+  port(A : in reg32;
+       S : out reg32);
+end inv32;
+architecture comport of inv32 is 
+begin
+    S(31) <= (not A(31)) after prop; S(30) <= (not A(30)) after prop;
+    S(29) <= (not A(29)) after prop; S(28) <= (not A(28)) after prop;
+    S(27) <= (not A(27)) after prop; S(26) <= (not A(26)) after prop;
+    S(25) <= (not A(25)) after prop; S(24) <= (not A(24)) after prop;
+    S(23) <= (not A(23)) after prop; S(22) <= (not A(22)) after prop;
+    S(21) <= (not A(21)) after prop; S(20) <= (not A(20)) after prop;
+    S(19) <= (not A(19)) after prop; S(18) <= (not A(18)) after prop;
+    S(17) <= (not A(17)) after prop; S(16) <= (not A(16)) after prop;
+    S(15) <= (not A(15)) after prop; S(14) <= (not A(14)) after prop;
+    S(13) <= (not A(13)) after prop; S(12) <= (not A(12)) after prop;
+    S(11) <= (not A(11)) after prop; S(10) <= (not A(10)) after prop;
+    S(9) <= (not A(9)) after prop; S(8) <= (not A(8)) after prop;
+    S(7) <= (not A(7)) after prop; S(6) <= (not A(6)) after prop;
+    S(5) <= (not A(5)) after prop; S(4) <= (not A(4)) after prop;
+    S(3) <= (not A(3)) after prop; S(2) <= (not A(2)) after prop;
+    S(1) <= (not A(1)) after prop; S(0) <= (not A(0)) after prop;
+end architecture comport;
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+-- porta AND de 2 entradas
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+use work.p_wires.all;
+entity and2 is
+  generic (prop : time := t_and2);
+  port(A, B : in  bit;  -- entradas A,B
+       S    : out bit); -- saida C
+end and2;
+architecture and2 of and2 is 
+begin
+    S <= A and B after prop;
+end and2;
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+-- porta OR de 2 entradas
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+use work.p_wires.all;
+entity or2 is
+  generic (prop : time := t_or2);
+  port(A,B : in bit;
+       S   : out bit);
+end or2;
+architecture comport of or2 is 
+begin
+  S <= reject t_rej inertial (A or B) after prop;
+end architecture comport;
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+-- porta OR de 3 entradas
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+use work.p_wires.all;
+entity or3 is
+  generic (prop : time := t_or3);
+  port(A, B, C : in  bit;  -- entradas A,B,C
+       S       : out bit); -- saida S 
+end or3;
+architecture or3 of or3 is 
+begin
+    S <= A or B or C after prop;
+end or3;
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+-- porta XOR de 2 entradas
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+use work.p_wires.all;
+entity xor2 is
+  port(A,B : in bit;
+       S   : out bit);
+end xor2;
+architecture comport of xor2 is 
+begin
+  S <= reject t_rej inertial (A xor B) after t_xor2;
+end architecture comport;
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+-- porta XOR de 3 entradas
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+use work.p_wires.all;
+entity xor3 is
+  generic (prop : time := t_xor3);
+  port(A, B, C : in  bit;   -- entradas A,B,C
+       S       : out bit);  -- saida S 
+end xor3;
+architecture xor3 of xor3 is 
+begin
+    S <= A xor B xor C after prop;
+end xor3;
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+-- REGISTRADORES
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+-- N-bit register, synchronous load active in '0', asynch reset
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+library IEEE;
+use work.p_WIRES.all;
+entity registerN is
+  generic (NUM_BITS: integer := 16;
+           INIT_VAL: bit_vector);
+  port(clk, rst, ld: in  bit;
+       D:            in  bit_vector(NUM_BITS-1 downto 0);
+       Q:            out bit_vector(NUM_BITS-1 downto 0));
+end registerN;
+architecture functional of registerN is
+begin
+  process(clk, rst, ld)
+    variable state: bit_vector(NUM_BITS-1 downto 0);
+  begin
+    if rst = '0' then
+      state := INIT_VAL;
+    elsif rising_edge(clk) then
+      if ld = '0' then
+        state := D;
+      end if;
+    end if;
+    Q <= state;
+  end process;
+  
+end functional;
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+-- registrador de 32 bits, reset=0 assincrono, load=1 sincrono
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+use work.p_WIRES.all;
+entity registrador32 is
+  port(rel, rst, ld: in  bit;
+        D:           in  reg32;
+        Q:           out reg32);
+end registrador32;
+architecture funcional of registrador32 is
+  signal value: reg32;
+begin
+  process(rel, rst, ld)
+  begin
+    if rst = '0' then
+      value <= x"00000000";
+    elsif ld = '1' and rising_edge(rel) then
+      value <= D;
+    end if;
+  end process;
+  Q <= value after t_FFD;
+end funcional;
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+-- SOMADORES
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+-- somador completo de um bit, modelo estrutural
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+library IEEE; use IEEE.std_logic_1164.all; use work.p_wires.all;
+entity addBit is
+  port(bitA, bitB, vem : in bit;    -- entradas A,B,vem-um
+       soma, vai       : out bit);  -- saida C,vai-um
+end addBit;
+architecture estrutural of addBit is
+  component and2 is generic (prop:time);
+                      port (A,B: in bit; S: out bit);
+  end component and2;
+  component or3 is generic (prop:time);
+                      port (A,B,C: in bit; S: out bit);
+  end component or3;
+  component xor3 is generic (prop:time);
+                      port (A,B,C: in bit; S: out bit);
+  end component xor3;
+  signal a1,a2,a3: bit;
+begin
+  U_xor:  xor3 generic map ( t_xor3 ) port map ( bitA, bitB, vem, soma );
+  U_and1: and2 generic map ( t_and2 ) port map ( bitA, bitB, a1 );
+  U_and2: and2 generic map ( t_and2 ) port map ( bitA, vem,  a2 );
+  U_and3: and2 generic map ( t_and2 ) port map ( vem,  bitB, a3 );
+  U_or:   or3  generic map ( t_or3  ) port map ( a1, a2, a3, vai );
+end estrutural;
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+--++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+-- somador de 16 bits, sem adiantamento de vai-um
+--++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+library IEEE; use IEEE.std_logic_1164.all; use work.p_wires.all;
+entity somador16bits is
+  port(A, B : in reg16;
+       C : out reg16;
+       vem  : in bit;
+       vai  : out bit
+       );
+end somador16bits;
+architecture soma of somador16bits is
+  component addBit port(bitA, bitB, vem : in bit;
+               soma, vai : out bit);
+  end component addBit;
+  signal v : reg16;
+  signal r : reg16;
+begin
+  U_b0: addBit port map (A(0), B(0), vem,  r(0), v(0));
+  U_b1: addBit port map (A(1), B(1), v(0), r(1), v(1));
+  U_b2: addBit port map (A(2), B(2), v(1), r(2), v(2));
+  U_b3: addBit port map (A(3), B(3), v(2), r(3), v(3));
+  U_b4: addBit port map (A(4), B(4), v(3), r(4), v(4));
+  U_b5: addBit port map (A(5), B(5), v(4), r(5), v(5));
+  U_b6: addBit port map (A(6), B(6), v(5), r(6), v(6));
+  U_b7: addBit port map (A(7), B(7), v(6), r(7), v(7));
+  U_b8: addBit port map (A(8), B(8), v(7), r(8), v(8));
+  U_b9: addBit port map (A(9), B(9), v(8), r(9), v(9));
+  U_b00: addBit port map (A(10),B(10),v(9), r(10),v(10));
+  U_b01: addBit port map (A(11),B(11),v(10),r(11),v(11));
+  U_b02: addBit port map (A(12),B(12),v(11),r(12),v(12));
+  U_b03: addBit port map (A(13),B(13),v(12),r(13),v(13));
+  U_b04: addBit port map (A(14),B(14),v(13),r(14),v(14));
+  U_b05: addBit port map (A(15),B(15),v(14),r(15),v(15));
+  vai <= v(15);
+  C <= r;
+end soma;
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+-- Somador 32 bits
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+use work.p_WIRES.all;
+entity somador32bits is
+	port (A,B : in reg32;
+			vem: in bit;
+			vai: out bit;
+			C: out reg32);
+end somador32bits;
+
+architecture soma of somador32bits is
+	component addbit is
+	port(bitA, bitB, vem : in bit;    -- entradas A,B,vem-um
+       soma, vai       : out bit);  -- saida C,vai-um
+	end component addBit;
+	signal sinalVai: reg32;
+begin
+	Ua0: addbit port map (A(0),B(0),vem,C(0),sinalVai(0));
+	Ua1: addbit port map(A(1),B(1),sinalVai(0),C(1),sinalVai(1));
+	Ua2: addbit port map(A(2),B(2),sinalVai(1),C(2),sinalVai(2));
+	Ua3: addbit port map(A(3),B(3),sinalVai(2),C(3),sinalVai(3));
+	Ua4: addbit port map(A(4),B(4),sinalVai(3),C(4),sinalVai(4));
+	Ua5: addbit port map (A(5),B(5),sinalVai(4),C(5),sinalVai(5));
+	Ua6: addbit port map (A(6),B(6),sinalVai(5),C(6),sinalVai(6));
+	Ua7: addbit port map (A(7),B(7),sinalVai(6),C(7),sinalVai(7));
+	Ua8: addbit port map (A(8),B(8),sinalVai(7),C(8),sinalVai(8));
+	Ua9: addbit port map (A(9),B(9),sinalVai(8),C(9),sinalVai(9));
+	Ua10: addbit port map (A(10),B(10),sinalVai(9),C(10),sinalVai(10));
+	Ua11: addbit port map (A(11),B(11),sinalVai(10),C(11),sinalVai(11));
+	Ua12: addbit port map (A(12),B(12),sinalVai(11),C(12),sinalVai(12));
+	Ua13: addbit port map (A(13),B(13),sinalVai(12),C(13),sinalVai(13));
+	Ua14: addbit port map (A(14),B(14),sinalVai(13),C(14),sinalVai(14));
+	Ua15: addbit port map (A(15),B(15),sinalVai(14),C(15),sinalVai(15));
+	Ua16: addbit port map (A(16),B(16),sinalVai(15),C(16),sinalVai(16));
+	Ua17: addbit port map (A(17),B(17),sinalVai(16),C(17),sinalVai(17));
+	Ua18: addbit port map (A(18),B(18),sinalVai(17),C(18),sinalVai(18));
+	Ua19: addbit port map (A(19),B(19),sinalVai(18),C(19),sinalVai(19));
+	Ua20: addbit port map (A(20),B(20),sinalVai(19),C(20),sinalVai(20));
+	Ua21: addbit port map (A(21),B(21),sinalVai(20),C(21),sinalVai(21));
+	Ua22: addbit port map (A(22),B(22),sinalVai(21),C(22),sinalVai(22));
+	Ua23: addbit port map (A(23),B(23),sinalVai(22),C(23),sinalVai(23));
+	Ua24: addbit port map (A(24),B(24),sinalVai(23),C(24),sinalVai(24));
+	Ua25: addbit port map (A(25),B(25),sinalVai(24),C(25),sinalVai(25));
+	Ua26: addbit port map (A(26),B(26),sinalVai(25),C(26),sinalVai(26));
+	Ua27: addbit port map (A(27),B(27),sinalVai(26),C(27),sinalVai(27));
+	Ua28: addbit port map (A(28),B(28),sinalVai(27),C(28),sinalVai(28));
+	Ua29: addbit port map (A(29),B(29),sinalVai(28),C(29),sinalVai(29));
+	Ua30: addbit port map (A(30),B(30),sinalVai(29),C(30),sinalVai(30));
+	Ua31: addbit port map (A(31),B(31),sinalVai(30),C(31),vai);
+end soma;
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+-- MULTIPLICADORES
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+-- multiplicador 32 bits por 1 bit
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+library IEEE; use IEEE.std_logic_1164.all; use work.p_wires.all;
+
+entity m_p_1 is
+  port(A,B : in  reg32;                 -- entradas A,B
+       S : in bit;                      -- bit por multiplicar
+       R : out reg33);                  -- produto parcial
+end m_p_1;
+
+architecture estrutural of m_p_1 is 
+  component somador32bits is
+	port (A,B : in reg32;
+			vem: in bit;
+			vai: out bit;
+			C: out reg32);
+	end component somador32bits;
+	
+	component mux2Vet32 is
+	 port(A,B : in  reg32;
+       S   : in  bit;
+       Z   : out reg32);
+	 end component mux2Vet32;
+	 
+	component mux2 is
+	  port(A,B : in  bit;
+       S   : in  bit;
+       Z   : out bit);
+	end component mux2;
+	
+	signal somaAB : reg33;
+	signal rf : reg32;
+	signal ri : bit;
+
+begin
+
+  U_soma: somador32bits
+    port map(A, B, '0', somaAB(32) , somaAB(31 downto 0)); 
+
+  U_m32: mux2Vet32 port map (B, somaAB(31 downto 0), S, rf);
+  U_m1: mux2 port map ('0', somaAB(32), S, ri);
+  R <= ri & rf;
+
+end estrutural;
+--++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+--++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+-- Multiplicador de 32 bits combinacional
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+library IEEE; use IEEE.std_logic_1164.all; use IEEE.numeric_std.all;
+use work.p_wires.all;
+
+entity mult32x32 is
+  port(A, B : in  reg32;   -- entradas A,B
+       prod : out reg64);  -- produto
+end mult32x32;
+
+ architecture estrutural of mult32x32 is 
+ 
+   component m_p_1 is
+  port(A,B : in  reg32;                 -- entradas A,B
+       S : in bit;                      -- bit por multiplicar
+       R : out reg33);                  -- produto parcial
+  end component m_p_1;
+ 
+   signal p01,p02,p03,p04,p05,p06,p07,p08: reg33;
+   signal p09,p10,p11,p12,p13,p14,p15,p16: reg33;
+   signal p17,p18,p19,p20,p21,p22,p23,p24: reg33;
+   signal p25,p26,p27,p28,p29,p30,p31,p32: reg33;
+ 
+ begin
+ 
+    U_00: m_p_1 port map ( A, x"00000000", B(0), p01);
+    U_01: m_p_1 port map ( A, p01(32 downto 1), B(1), p02);
+    U_02: m_p_1 port map ( A, p02(32 downto 1), B(2), p03);
+    U_03: m_p_1 port map ( A, p03(32 downto 1), B(3), p04);
+    U_04: m_p_1 port map ( A, p04(32 downto 1), B(4), p05);
+    U_05: m_p_1 port map ( A, p05(32 downto 1), B(5), p06);
+    U_06: m_p_1 port map ( A, p06(32 downto 1), B(6), p07);
+    U_07: m_p_1 port map ( A, p07(32 downto 1), B(7), p08);
+    U_08: m_p_1 port map ( A, p08(32 downto 1), B(8), p09);
+    U_09: m_p_1 port map ( A, p09(32 downto 1), B(9), p10);
+    U_10: m_p_1 port map ( A, p10(32 downto 1), B(10), p11);
+    U_11: m_p_1 port map ( A, p11(32 downto 1), B(11), p12);
+    U_12: m_p_1 port map ( A, p12(32 downto 1), B(12), p13);
+    U_13: m_p_1 port map ( A, p13(32 downto 1), B(13), p14);
+    U_14: m_p_1 port map ( A, p14(32 downto 1), B(14), p15);
+    U_15: m_p_1 port map ( A, p15(32 downto 1), B(15), p16);
+    U_16: m_p_1 port map ( A, p16(32 downto 1), B(16), p17);
+    U_17: m_p_1 port map ( A, p17(32 downto 1), B(17), p18);
+    U_18: m_p_1 port map ( A, p18(32 downto 1), B(18), p19);
+    U_19: m_p_1 port map ( A, p19(32 downto 1), B(19), p20);
+    U_20: m_p_1 port map ( A, p20(32 downto 1), B(20), p21);
+    U_21: m_p_1 port map ( A, p21(32 downto 1), B(21), p22);
+    U_22: m_p_1 port map ( A, p22(32 downto 1), B(22), p23);
+    U_23: m_p_1 port map ( A, p23(32 downto 1), B(23), p24);
+    U_24: m_p_1 port map ( A, p24(32 downto 1), B(24), p25);
+    U_25: m_p_1 port map ( A, p25(32 downto 1), B(25), p26);
+    U_26: m_p_1 port map ( A, p26(32 downto 1), B(26), p27);
+    U_27: m_p_1 port map ( A, p27(32 downto 1), B(27), p28);
+    U_28: m_p_1 port map ( A, p28(32 downto 1), B(28), p29);
+    U_29: m_p_1 port map ( A, p29(32 downto 1), B(29), p30);
+    U_30: m_p_1 port map ( A, p30(32 downto 1), B(30), p31);
+    U_31: m_p_1 port map ( A, p31(32 downto 1), B(31), p32);
+
+    prod <= p32 & p31(0) & p30(0) & p29(0) & p28(0) & p27(0) & p26(0) 
+    			& p25(0) & p24(0) & p23(0) & p22(0) & p21(0) 
+    			& p20(0) & p19(0) & p18(0) & p17(0) & p16(0)
+    			& p15(0) & p14(0) & p13(0) & p12(0) & p11(0) 
+    			& p10(0) & p09(0) & p08(0) & p07(0) & p06(0) 
+    			& p05(0) & p04(0) & p03(0) & p02(0) & p01(0);
+   
+end estrutural;
+-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+-- DESLOCADORES
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ 
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+use work.p_wires.all;
+entity des1l is
+  port (A: in reg32;
+		S: in bit;
+		B: out reg32);
+end des1l;
+architecture desloca of des1l is
+
+  component  mux2Vet32 is
+  port(A,B : in  reg32;
+       S   : in  bit;
+       Z   : out reg32);
+  end component mux2Vet32;
+  
+  signal aux : reg32;
+
+begin
+
+  aux(31 downto 1) <= A(30 downto 0);
+  aux (0) <= '0';
+  Udesl0 : mux2Vet32 port map (A, aux, S, B);
+end desloca;
+
+-- -----------------------------------------------------------------------
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+use work.p_wires.all;
+entity des2l is
+  port (A: in reg32;
+		S: in bit;
+		B: out reg32);
+end des2l;
+architecture desloca of des2l is
+
+  component  mux2Vet32 is
+  port(A,B : in  reg32;
+       S   : in  bit;
+       Z   : out reg32);
+  end component mux2Vet32;
+  
+  signal aux : reg32;
+
+begin
+
+  aux(31 downto 2) <= A(29 downto 0);
+  aux (0) <= '0';
+  aux (1) <= '0';
+  Udesl0 : mux2Vet32 port map (A, aux, S, B);
+end desloca;
+-- -----------------------------------------------------------------------
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+use work.p_wires.all;
+entity des4l is
+  port (A: in reg32;
+		S: in bit;
+		B: out reg32);
+end des4l;
+architecture desloca of des4l is
+
+  component  mux2Vet32 is
+  port(A,B : in  reg32;
+       S   : in  bit;
+       Z   : out reg32);
+  end component mux2Vet32;
+  
+  signal aux : reg32;
+
+begin
+
+  aux(31 downto 4) <= A(27 downto 0);
+  aux (3 downto 0) <= x"0";
+  Udesl0 : mux2Vet32 port map (A, aux, S, B);
+end desloca;
+-- -----------------------------------------------------------------------
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+use work.p_wires.all;
+entity des8l is
+  port (A: in reg32;
+		S: in bit;
+		B: out reg32);
+end des8l;
+architecture desloca of des8l is
+
+  component  mux2Vet32 is
+  port(A,B : in  reg32;
+       S   : in  bit;
+       Z   : out reg32);
+  end component mux2Vet32;
+  
+  signal aux : reg32;
+
+begin
+
+  aux(31 downto 8) <= A(23 downto 0);
+  aux (7 downto 0) <= x"00";
+  Udesl0 : mux2Vet32 port map (A, aux, S, B);
+end desloca;
+-- -----------------------------------------------------------------------
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+use work.p_wires.all;
+entity des16l is
+  port (A: in reg32;
+		S: in bit;
+		B: out reg32);
+end des16l;
+architecture desloca of des16l is
+
+  component  mux2Vet32 is
+  port(A,B : in  reg32;
+       S   : in  bit;
+       Z   : out reg32);
+  end component mux2Vet32;
+  
+  signal aux : reg32;
+
+begin
+
+  aux(31 downto 16) <= A(15 downto 0);
+  aux (15 downto 0) <= x"0000";
+  Udesl0 : mux2Vet32 port map (A, aux, S, B);
+end desloca;
+-- -----------------------------------------------------------------------
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+use work.p_wires.all;
+entity des32l is
+  port (A: in reg32;
+		S: in bit;
+		B: out reg32);
+end des32l;
+architecture desloca of des32l is
+
+  component  mux2Vet32 is
+  port(A,B : in  reg32;
+       S   : in  bit;
+       Z   : out reg32);
+  end component mux2Vet32;
+  
+  signal aux : reg32;
+
+begin
+  aux <= x"00000000";
+  Udesl0 : mux2Vet32 port map (A, aux, S, B);
+end desloca;
+-- -----------------------------------------------------------------------
+use work.p_wires.all;
+entity desl is
+  port (A: in reg32;
+		S: in reg32;
+		B: out reg32);
+end desl;
+
+architecture desloca of desl is
+
+ component  des1l is
+  port (A: in reg32;
+		S: in bit;
+		B: out reg32);
+  end component des1l;
+  
+  component  des2l is
+  port (A: in reg32;
+		S: in bit;
+		B: out reg32);
+  end component des2l;
+  
+  component  des4l is
+  port (A: in reg32;
+		S: in bit;
+		B: out reg32);
+  end component des4l;
+  
+  component  des8l is
+  port (A: in reg32;
+		S: in bit;
+		B: out reg32);
+  end component des8l;
+  
+  component  des16l is
+  port (A: in reg32;
+		S: in bit;
+		B: out reg32);
+  end component des16l;
+
+  component  des32l is
+  port (A: in reg32;
+		S: in bit;
+		B: out reg32);
+  end component des32l;
+  
+  signal aux0,aux1,aux2,aux3,aux4 : reg32;
+
+begin
+ 
+  Udes0 : des1l port map (A,s(0),aux0);
+  Udes1 : des2l port map (aux0,s(1),aux1);
+  Udes2 : des4l port map (aux1,s(2),aux2);
+  Udes3 : des8l port map (aux2,s(3),aux3);
+  Udes4 : des16l port map (aux3,s(4), aux4);
+  Udes5 : des32l port map (aux4, s(5), B);
+  
+end desloca;
+-- -----------------------------------------------------------------------
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+use work.p_wires.all;
+entity des1r is
+  port (A: in reg32;
+		S: in bit;
+		B: out reg32);
+end des1r;
+architecture desloca of des1r is
+
+  component  mux2Vet32 is
+  port(A,B : in  reg32;
+       S   : in  bit;
+       Z   : out reg32);
+  end component mux2Vet32;
+  
+  signal aux : reg32;
+
+begin
+
+  aux(30 downto 0) <= A(31 downto 1);
+  aux (31) <= '0';
+  Udesl0 : mux2Vet32 port map (A, aux, S, B);
+end desloca;
+-- -----------------------------------------------------------------------
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+use work.p_wires.all;
+entity des2r is
+  port (A: in reg32;
+		S: in bit;
+		B: out reg32);
+end des2r;
+architecture desloca of des2r is
+
+  component  mux2Vet32 is
+  port(A,B : in  reg32;
+       S   : in  bit;
+       Z   : out reg32);
+  end component mux2Vet32;
+  
+  signal aux : reg32;
+
+begin
+
+  aux(29 downto 0) <= A(31 downto 2);
+  aux (31) <= '0';
+  aux (30) <= '0';
+  Udesl0 : mux2Vet32 port map (A, aux, S, B);
+end desloca;
+-- -----------------------------------------------------------------------
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+use work.p_wires.all;
+entity des4r is
+  port (A: in reg32;
+		S: in bit;
+		B: out reg32);
+end des4r;
+architecture desloca of des4r is
+
+  component  mux2Vet32 is
+  port(A,B : in  reg32;
+       S   : in  bit;
+       Z   : out reg32);
+  end component mux2Vet32;
+  
+  signal aux : reg32;
+
+begin
+
+  aux(27 downto 0) <= A(31 downto 4);
+  aux (31 downto 28) <= x"0";
+  Udesl0 : mux2Vet32 port map (A, aux, S, B);
+end desloca;
+-- -----------------------------------------------------------------------
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+use work.p_wires.all;
+entity des8r is
+  port (A: in reg32;
+		S: in bit;
+		B: out reg32);
+end des8r;
+architecture desloca of des8r is
+
+  component  mux2Vet32 is
+  port(A,B : in  reg32;
+       S   : in  bit;
+       Z   : out reg32);
+  end component mux2Vet32;
+  
+  signal aux : reg32;
+
+begin
+
+  aux(23 downto 0)<= A (31 downto 8) ;
+  aux (31 downto 24) <= x"00";
+  Udesl0 : mux2Vet32 port map (A, aux, S, B);
+end desloca;
+-- -----------------------------------------------------------------------
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+use work.p_wires.all;
+entity des16r is
+  port (A: in reg32;
+		S: in bit;
+		B: out reg32);
+end des16r;
+architecture desloca of des16r is
+
+  component  mux2Vet32 is
+  port(A,B : in  reg32;
+       S   : in  bit;
+       Z   : out reg32);
+  end component mux2Vet32;
+  
+  signal aux : reg32;
+
+begin
+
+  aux(15 downto 0)<= A(31 downto 16) ;
+  aux (31 downto 16) <= x"0000";
+  Udesl0 : mux2Vet32 port map (A, aux, S, B);
+end desloca;
+-- -----------------------------------------------------------------------
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+use work.p_wires.all;
+entity des32r is
+  port (A: in reg32;
+		S: in bit;
+		B: out reg32);
+end des32r;
+architecture desloca of des32r is
+
+  component  mux2Vet32 is
+  port(A,B : in  reg32;
+       S   : in  bit;
+       Z   : out reg32);
+  end component mux2Vet32;
+  
+  signal aux : reg32;
+
+begin
+  aux <= x"00000000";
+  Udesl0 : mux2Vet32 port map (A, aux, S, B);
+end desloca;
+-- -----------------------------------------------------------------------
+use work.p_wires.all;
+entity desr is
+  port (A: in reg32;
+		S: in reg32;
+		B: out reg32);
+end desr;
+
+architecture desloca of desr is
+
+ component  des1r is
+  port (A: in reg32;
+		S: in bit;
+		B: out reg32);
+  end component des1r;
+  
+  component  des2r is
+  port (A: in reg32;
+		S: in bit;
+		B: out reg32);
+  end component des2r;
+  
+  component  des4r is
+  port (A: in reg32;
+		S: in bit;
+		B: out reg32);
+  end component des4r;
+  
+  component  des8r is
+  port (A: in reg32;
+		S: in bit;
+		B: out reg32);
+  end component des8r;
+  
+  component  des16r is
+  port (A: in reg32;
+		S: in bit;
+		B: out reg32);
+  end component des16r;
+
+  component  des32r is
+  port (A: in reg32;
+		S: in bit;
+		B: out reg32);
+  end component des32r;
+  
+  signal aux0,aux1,aux2,aux3,aux4 : reg32;
+
+begin
+  Udes0 : des1r port map (A,s(0),aux0);
+  Udes1 : des2r port map (aux0,s(1),aux1);
+  Udes2 : des4r port map (aux1,s(2),aux2);
+  Udes3 : des8r port map (aux2,s(3),aux3);
+  Udes4 : des16r port map (aux3,s(4), aux4);
+  Udes5 : des32r port map (aux4, s(5), B);
+end desloca;
+-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
